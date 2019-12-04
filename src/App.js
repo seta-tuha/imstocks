@@ -1,25 +1,46 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
+import { Layout } from 'antd';
+
+import { Menu, Icon } from 'antd';
+
+import Home from './pages/Home';
+import SignUp from './components/SignUp';
+
+const { Content } = Layout;
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Layout>
+        <Menu mode="horizontal">
+          <Menu.Item key="home">
+            <Icon type="gitlab" />
+          </Menu.Item>
+          <Menu.Item key="explore">
+            <Icon type="bulb" />
+            Explore
+      </Menu.Item>
+          <Menu.Item>
+            <Icon type="user" />
+            Login/Signup
+      </Menu.Item>
+        </Menu>
+        <Content>
+          <Switch>
+            <Route path="/">
+              <Home />
+            </Route>
+          </Switch>
+        </Content>]
+        <SignUp />
+      </Layout>
+    </Router>
   );
 }
 

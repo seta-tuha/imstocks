@@ -27,7 +27,10 @@ export default function SignUp() {
               'fields': "nextPageToken, files(id, name)"
             }).then(function (response) {
               var files = response.result.files;
-              console.log(files)
+              return files
+            }).then(files => {
+              window.gapi.client.drive.files.get({fileId: files[0].id, fields: "webViewLink"})
+                .then(response => console.log(response.result.webViewLink))
             });
           });
 

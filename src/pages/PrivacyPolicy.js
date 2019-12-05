@@ -84,7 +84,7 @@ export default function PrivacyPolicy() {
       <p><span>We may change this Privacy Policy from time to time. We will post any Privacy Policy changes on this page, with a revised date at the top of this page. If the changes are significant, we will provide a more prominent notice by adding a notice on the homepages of our websites or login screens for the Services, or by sending you an email notification. We encourage you to review the Privacy Policy whenever you access the Services to stay informed about our data privacy practices and your choices regarding your information.</span></p>
       <p><span>If you disagree with this Privacy Policy and/or any changes hereto, you will need to stop using the Services.</span></p>
       <h3>CONTACT</h3>
-      <p><span>If you have any questions regarding this Privacy Policy, please email us at&nbsp;<a href="mailto:privacy@veritone.com">privacy@veritone.com</a>&nbsp;or write to:</span></p>
+      <p><span>If you have any questions regarding this Privacy Policy, please email us at&nbsp;<a href="mailto:hondasuytu.ht@gmail.com">hondasuytu.ht@gmail.com</a>&nbsp;or write to:</span></p>
     </section>
   )
 }

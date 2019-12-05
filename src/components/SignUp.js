@@ -1,10 +1,151 @@
 import React from 'react';
-import { Modal, Divider, Avatar, Typography, Tag } from 'antd';
+import { Modal, Divider, Avatar, Typography, Tag, Form, Input, Icon, Button } from 'antd';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import database from '../Firebase';
 
 import { loadJS } from '../utils';
+
+class CreateSignUpForm extends React.Component {
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        console.log('Received values of form: ', values);
+      }
+    });
+  };
+
+  compareToFirstPassword = (rule, value, callback) => {
+    const { form } = this.props;
+    if (value && value !== form.getFieldValue('password')) {
+      callback('Two passwords that you enter is inconsistent!');
+    } else {
+      callback();
+    }
+  };
+
+  validateToNextPassword = (rule, value, callback) => {
+    const { form } = this.props;
+    if (value) {
+      form.validateFields(['confirm'], { force: true });
+    }
+    callback();
+  };
+
+  render() {
+    const { getFieldDecorator } = this.props.form;
+    return (
+      <Form onSubmit={this.handleSubmit} className="login-form">
+        <Form.Item>
+          {getFieldDecorator('email', {
+            rules: [ {
+              type: 'email',
+              message: 'The input is not valid E-mail!',
+            },{ required: true, message: 'Please input your email!' }],
+          })(
+            <Input
+              prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Email"
+            />,
+          )}
+        </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('password', {
+            rules: [{ required: true, message: 'Please input your Password!' }, {
+              validator: this.validateToNextPassword,
+            },],
+          })(
+            <Input
+              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              type="password"
+              placeholder="Password"
+            />,
+          )}
+        </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('confirm', {
+            rules: [{ required: true, message: 'Please input your Password!' }, {
+              validator: this.compareToFirstPassword,
+            },],
+          })(
+            <Input
+              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              type="password"
+              placeholder="Confirm Password"
+            />,
+          )}
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" className="login-form-button">
+            Sign up
+          </Button>
+        </Form.Item>
+        <Divider />
+        Or login with <Button onClick={this.props.onGoogle}><Icon type="google" />&nbsp;Google</Button>
+      </Form>
+    );
+  }
+}
+
+class CreateSignInForm extends React.Component {
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        console.log('Received values of form: ', values);
+      }
+    });
+  };
+
+  render() {
+    const { getFieldDecorator } = this.props.form;
+    return (
+      <Form onSubmit={this.handleSubmit} className="login-form">
+        <Form.Item>
+          {getFieldDecorator('email', {
+            rules: [ {
+              type: 'email',
+              message: 'The input is not valid E-mail!',
+            },{ required: true, message: 'Please input your email!' }],
+          })(
+            <Input
+              prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Email"
+            />,
+          )}
+        </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('password', {
+            rules: [{ required: true, message: 'Please input your Password!' }, {
+              validator: this.validateToNextPassword,
+            },],
+          })(
+            <Input
+              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              type="password"
+              placeholder="Password"
+            />,
+          )}
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" className="login-form-button">
+            Login
+          </Button>
+        </Form.Item>
+        <Divider />
+        Or login with <Button onClick={this.props.onGoogle}><Icon type="google" />&nbsp;Google</Button>
+      </Form>
+    );
+  }
+}
+
+
+
+
+const SignUpForm = Form.create({ name: 'signup' })(CreateSignUpForm)
+const SignInForm = Form.create({ name: 'login'})(CreateSignInForm);
+
 
 export default function SignUp() {
   const locations = useLocation();
@@ -38,22 +179,6 @@ export default function SignUp() {
           })
         })
       } while (next !== null)
-      // .then(function (response) {
-      //   var files = response.result.files;
-      //   console.log(files)
-      //   return files
-      // }).then(files => {
-      //   Promise.all(files.map(file => window.gapi.client.drive.files.get({ fileId: file.id, fields: "*" })))
-      //     .then(responses => responses.map(r => console.log(r.result.webViewLink)))
-      // window.gapi.client.drive.files.get({ fileId: files[0].id, fields: "*" })
-      //   .then(response => {
-      //     const newLink = database.ref('links/').push();
-      //     newLink.set({
-      //       name: response.result.name,
-      //       link: response.result.webViewLink
-      //     })
-      //     console.log(response.result.webViewLink)
-      //   })
     });
   }, []);
 
@@ -72,12 +197,21 @@ export default function SignUp() {
               DD
             </Avatar>
             <Tag>PRO</Tag>
-            <Typography>Active photographer</Typography>
+            <Typography style={{marginTop: 50}}>Professional photographer</Typography>
+            <div style={{display: "flex"}}>
+            <Typography><strong>1.2k</strong>&nbsp;followers</Typography>
+            <Typography style={{marginLeft: 70 }}>2 followings</Typography>
+            </div>
             <Divider />
             <Typography>User is protected, Signup to see his content</Typography>
-            <button onClick={useGoogle}>Google</button>
+            <SignInForm onGoogle={useGoogle} />
           </>
-        ) : "Signup"
+        ) : (
+            <>
+              <Typography>Signup or login to continue</Typography>
+              <SignUpForm onGoogle={useGoogle} />
+            </>
+          )
       }
     </Modal>
   )

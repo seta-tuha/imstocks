@@ -2,8 +2,9 @@ import React from 'react';
 import { Modal, Divider, Avatar, Typography, Tag, Form, Input, Icon, Button } from 'antd';
 import { useLocation, useHistory, Link, withRouter } from 'react-router-dom';
 
-import database from '../Firebase';
+import googleButton from './btn_google_signin_light_focus_web.png';
 
+import database from '../Firebase';
 import { loadJS } from '../utils';
 
 class CreateSignUpForm extends React.Component {
@@ -238,7 +239,7 @@ export default function SignUp() {
                 isLoggingIn && <SignInForm />
               }
               <Divider />
-              Or login with <Button onClick={useGoogle}><Icon type="google" />&nbsp;Google</Button>
+              Or&nbsp;<img src={googleButton} onClick={useGoogle} alt="sigin" />
             </>
           )
       }

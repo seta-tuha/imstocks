@@ -29,9 +29,11 @@ function App() {
             </Link>
           </Menu.Item>
           <Menu.Item key="explore">
-            <Icon type="bulb" />
-            Explore
-      </Menu.Item>
+            <Link to="/explore">
+              <Icon type="bulb" />
+              Explore
+            </Link>
+          </Menu.Item>
           <Menu.Item>
             <Link to="/?signup=true">
               <Icon type="user" />

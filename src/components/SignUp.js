@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Divider, Avatar, Typography, Tag, Form, Input, Icon, Button } from 'antd';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, Link, withRouter } from 'react-router-dom';
 
 import database from '../Firebase';
 
@@ -11,7 +11,10 @@ class CreateSignUpForm extends React.Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
+        const newUser = database.ref('users/').push();
+        newUser.set(values);
+        localStorage.setItem('logged', "true");
+        this.props.history.push('/');
       }
     });
   };
@@ -39,10 +42,10 @@ class CreateSignUpForm extends React.Component {
       <Form onSubmit={this.handleSubmit} className="login-form">
         <Form.Item>
           {getFieldDecorator('email', {
-            rules: [ {
+            rules: [{
               type: 'email',
               message: 'The input is not valid E-mail!',
-            },{ required: true, message: 'Please input your email!' }],
+            }, { required: true, message: 'Please input your email!' }],
           })(
             <Input
               prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -80,20 +83,30 @@ class CreateSignUpForm extends React.Component {
           <Button type="primary" htmlType="submit" className="login-form-button">
             Sign up
           </Button>
+          &nbsp;or&nbsp;<Link to="/?login=true">Log in</Link>
         </Form.Item>
-        <Divider />
-        Or login with <Button onClick={this.props.onGoogle}><Icon type="google" />&nbsp;Google</Button>
       </Form>
     );
   }
 }
 
 class CreateSignInForm extends React.Component {
+  state = {
+    error: ""
+  }
+
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
+        database.ref('users/').on('value', (snapShot) => {
+          const error = Object.values(snapShot.val()).findIndex(({ email, password }) => email === values.email && password === values.password) >= 0 ? "" : "error";
+          this.setState({ error });
+          if (!error) {
+            localStorage.setItem('logged', "true");
+            this.props.history.push('/');
+          }
+        })
       }
     });
   };
@@ -104,10 +117,10 @@ class CreateSignInForm extends React.Component {
       <Form onSubmit={this.handleSubmit} className="login-form">
         <Form.Item>
           {getFieldDecorator('email', {
-            rules: [ {
+            rules: [{
               type: 'email',
               message: 'The input is not valid E-mail!',
-            },{ required: true, message: 'Please input your email!' }],
+            }, { required: true, message: 'Please input your email!' }],
           })(
             <Input
               prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -117,9 +130,7 @@ class CreateSignInForm extends React.Component {
         </Form.Item>
         <Form.Item>
           {getFieldDecorator('password', {
-            rules: [{ required: true, message: 'Please input your Password!' }, {
-              validator: this.validateToNextPassword,
-            },],
+            rules: [{ required: true, message: 'Please input your Password!' },],
           })(
             <Input
               prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -128,13 +139,16 @@ class CreateSignInForm extends React.Component {
             />,
           )}
         </Form.Item>
+        {this.state.error &&
+          <Form.Item>
+            <Typography style={{ color: 'red' }}>Email or password failed</Typography>
+          </Form.Item>
+        }
         <Form.Item>
           <Button type="primary" htmlType="submit" className="login-form-button">
             Login
           </Button>
         </Form.Item>
-        <Divider />
-        Or login with <Button onClick={this.props.onGoogle}><Icon type="google" />&nbsp;Google</Button>
       </Form>
     );
   }
@@ -143,8 +157,8 @@ class CreateSignInForm extends React.Component {
 
 
 
-const SignUpForm = Form.create({ name: 'signup' })(CreateSignUpForm)
-const SignInForm = Form.create({ name: 'login'})(CreateSignInForm);
+const SignUpForm = withRouter(Form.create({ name: 'signup' })(CreateSignUpForm))
+const SignInForm = withRouter(Form.create({ name: 'login' })(CreateSignInForm));
 
 
 export default function SignUp() {
@@ -185,11 +199,12 @@ export default function SignUp() {
 
 
   const search = locations.search.slice(1);
-  const openModal = search.length > 0 ? search.split("&").reduce((a, q) => ({ ...a, [q.split("=")[0]]: q.split("=")[1] }), {})["signup"] === "true" ? true : false : false;
+  const isSigningUp = search.length > 0 ? search.split("&").reduce((a, q) => ({ ...a, [q.split("=")[0]]: q.split("=")[1] }), {})["signup"] === "true" ? true : false : false;
+  const isLoggingIn = search.length > 0 ? search.split("&").reduce((a, q) => ({ ...a, [q.split("=")[0]]: q.split("=")[1] }), {})["login"] === "true" ? true : false : false;
   const includingUser = locations.pathname.includes('user');
 
   return (
-    <Modal visible={openModal} footer={null} onCancel={() => history.push('/')}>
+    <Modal visible={isSigningUp || isLoggingIn} footer={null} onCancel={() => history.push('/')}>
       {
         includingUser ? (
           <>
@@ -197,19 +212,33 @@ export default function SignUp() {
               DD
             </Avatar>
             <Tag>PRO</Tag>
-            <Typography style={{marginTop: 50}}>Professional photographer</Typography>
-            <div style={{display: "flex"}}>
-            <Typography><strong>1.2k</strong>&nbsp;followers</Typography>
-            <Typography style={{marginLeft: 70 }}>2 followings</Typography>
+            <Typography style={{ marginTop: 50 }}>Professional photographer</Typography>
+            <div style={{ display: "flex" }}>
+              <Typography><strong>1.2k</strong>&nbsp;followers</Typography>
+              <Typography style={{ marginLeft: 70 }}>2 followings</Typography>
             </div>
             <Divider />
             <Typography>User is protected, Signup to see his content</Typography>
-            <SignInForm onGoogle={useGoogle} />
+            {
+              isSigningUp && <SignUpForm />
+            }
+            {
+              isLoggingIn && <SignInForm />
+            }
+            <Divider />
+            Or login with <Button onClick={useGoogle}><Icon type="google" />&nbsp;Google</Button>
           </>
         ) : (
             <>
               <Typography>Signup or login to continue</Typography>
-              <SignUpForm onGoogle={useGoogle} />
+              {
+                isSigningUp && <SignUpForm />
+              }
+              {
+                isLoggingIn && <SignInForm />
+              }
+              <Divider />
+              Or login with <Button onClick={useGoogle}><Icon type="google" />&nbsp;Google</Button>
             </>
           )
       }

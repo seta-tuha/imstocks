@@ -10,6 +10,7 @@ import { Layout } from 'antd';
 import { Menu, Icon } from 'antd';
 
 import Home from './pages/Home';
+import User from './pages/User';
 import SignUp from './components/SignUp';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ToS from './pages/ToS';
@@ -45,6 +46,9 @@ function App() {
             </Route>
             <Route path="/terms">
               <ToS />
+            </Route>
+            <Route path="/user/:userId">
+              <User />
             </Route>
             <Route path="/">
               <Home />
